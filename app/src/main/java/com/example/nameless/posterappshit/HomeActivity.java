@@ -2,12 +2,14 @@ package com.example.nameless.posterappshit;
 
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
+import android.content.ContentResolver;
 import android.content.Intent;
 import android.database.Cursor;
 import android.graphics.Bitmap;
 import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -18,6 +20,7 @@ import android.support.v7.widget.RecyclerView;
 import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
+import android.webkit.MimeTypeMap;
 import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
@@ -25,6 +28,7 @@ import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ListView;
+import android.widget.ProgressBar;
 import android.widget.TabHost;
 import android.widget.TextView;
 import android.widget.Toast;
@@ -38,11 +42,15 @@ import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
+import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
+import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
+import com.squareup.picasso.Picasso;
 
 import java.io.File;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
 import java.util.Vector;
@@ -57,14 +65,26 @@ public class HomeActivity extends AppCompatActivity {
     private LinearLayout feedLayout;
     private  final  int IMAGEMGALERIA=1;
     private  final  int IMAGEMCAMERA=2;
+    Uri enderecoImagem;
+    ProgressBar progressBar;
+    private  final  String FOLDERFIREBASEIMAGE ="FAJFOTOS";
+    ArrayList<Post> listaDownload;
     // Inicializacao do local onde ira ficar a foto carregada
-    
+    Post post;
     // Cloud Storage
+    PostNewAdapter postNewAdapter;
+    MeuAdapter meuAdapter;
+    AlertDialog.Builder alertBuilder;
+    AlertDialog alertDialog;
 
     private StorageReference mStorageRef;
-    
+    private DatabaseReference mDatabaseRef;
 
-    
+    //Verifica se o upload esta' completo na base de dado
+    StorageTask myUploadTask;
+
+
+
     // --------------------------------------
     ImageView imagemCarregada ;
 
@@ -73,18 +93,39 @@ public class HomeActivity extends AppCompatActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        
+
         //Cloud Storage 
 
-        mStorageRef = FirebaseStorage.getInstance().getReference();
-        
+        mStorageRef = FirebaseStorage.getInstance().getReference(FOLDERFIREBASEIMAGE);
+        mDatabaseRef= FirebaseDatabase.getInstance().getReference(FOLDERFIREBASEIMAGE);
+
+        listaDownload = new ArrayList<>();
+
+        mDatabaseRef.addValueEventListener(new ValueEventListener() {
+            @Override
+            public void onDataChange(DataSnapshot dataSnapshot) {
+
+                for(DataSnapshot dataPost : dataSnapshot.getChildren()){
+
+                Post post = dataPost.getValue(Post.class);
+                listaDownload.add(post);
+
+                }
+               // meuAdapter = new MeuAdapter(listaDownload,HomeActivity.this);
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+                Toast.makeText(HomeActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
+            }
+        });
         // Toolbar config
 
         
         layoutprincipal = (LinearLayout) findViewById(R.id.layoutPrincipal);
         setContentView(R.layout.activity_home);
         android.support.v7.widget.Toolbar toolbar =(android.support.v7.widget.Toolbar) findViewById(R.id.toolBarFeed);
-        toolbar.setTitle(" FAJ FAJ");
+        toolbar.setTitle(" FAJ Five");
         //toolbar.setTitleTextColor(R.color.colorT);
 
         if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
@@ -99,7 +140,7 @@ public class HomeActivity extends AppCompatActivity {
 
         //Adapter e RVIew
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler);
-        final MeuAdapter meuAdapter = new MeuAdapter(this);
+        meuAdapter = new MeuAdapter(this);
         recyclerView.setAdapter(meuAdapter);
 
         //Layout Manager e RVIew
@@ -115,7 +156,7 @@ public class HomeActivity extends AppCompatActivity {
 
         //Adapter e RVIew
         RecyclerView recycleFeed = (RecyclerView) findViewById(R.id.recycleFeed);
-        final PostNewAdapter postNewAdapter = new PostNewAdapter(this);
+        postNewAdapter = new PostNewAdapter(this);
         recycleFeed.setAdapter(postNewAdapter);
 
         RecyclerView recycle5 = (RecyclerView) findViewById(R.id.recycle5);
@@ -173,7 +214,7 @@ public class HomeActivity extends AppCompatActivity {
             public void onDataChange(DataSnapshot dataSnapshot) {
 
                 for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    Post post = data.getValue(Post.class);
+                    post = data.getValue(Post.class);
 
                  meteNoSQL(post);
 
@@ -276,7 +317,7 @@ public class HomeActivity extends AppCompatActivity {
 
 
 
-        final AlertDialog.Builder alertBuilder = new AlertDialog.Builder(HomeActivity.this);
+        alertBuilder = new AlertDialog.Builder(HomeActivity.this);
         alertBuilder.setTitle("FAJ aqui !! ");
 
         // Estou a meter tudo num objecto de View para depois por no dialog
@@ -292,28 +333,35 @@ public class HomeActivity extends AppCompatActivity {
         //ListView listDialogContact = customView.findViewById(R.id.list_view_contacts_dialog);
         final EditText text = customView.findViewById(R.id.input_text_dialog_post);
 
+        //progress bar
+        progressBar=customView.findViewById(R.id.progressBarUpload);
+
 
         //listDialogContact.setAdapter(userAdapter);
 
         alertBuilder.setView(customView);
-        final AlertDialog alertDialog = alertBuilder.create();
+         alertDialog = alertBuilder.create();
         alertDialog.show();
 
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
+             if (myUploadTask!=null && myUploadTask.isInProgress()){ Toast.makeText(HomeActivity.this, "Processando...", Toast.LENGTH_SHORT).show();
+             }
+
+             else uploadImagem();
+
+                 Post post = new Post();
+                 post.setDate(System.currentTimeMillis());
+                 post.setSender(getString(R.string.usuarioAnonimo));
+                 // post.setSender(LoginActivity.firebaseUser.getDisplayName());
+                 post.setText(text.getEditableText().toString());
+
+                 anonimousPostReference.child(new Date(post.getDate()).toString()).setValue(post);
 
 
-                Post post = new Post();
-                post.setDate(System.currentTimeMillis());
-                post.setSender(getString(R.string.usuarioAnonimo));
-                // post.setSender(LoginActivity.firebaseUser.getDisplayName());
-                post.setText(text.getEditableText().toString());
+                 text.setText("");
 
-                anonimousPostReference.child(new Date(post.getDate()).toString()).setValue(post);
-
-                alertDialog.hide();
-                text.setText("");
             }
         });
 
@@ -333,9 +381,11 @@ public class HomeActivity extends AppCompatActivity {
         acessoGaleria.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-
-                Intent intentGaleria = new Intent(Intent.ACTION_PICK, MediaStore.Images.Media.EXTERNAL_CONTENT_URI);
-                startActivityForResult(intentGaleria,IMAGEMGALERIA);
+                Intent intent = new Intent();
+                intent.setType("image/*");
+                intent.setAction(Intent.ACTION_GET_CONTENT);
+                startActivityForResult(intent,IMAGEMGALERIA);
+                //PEDIR identifica o nosso pedido
             }
         });
 
@@ -348,31 +398,17 @@ public class HomeActivity extends AppCompatActivity {
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);
 
-        if (resultCode==RESULT_OK && requestCode == 1){
 
-            Uri uriImagem = data.getData();
+        if (requestCode == IMAGEMGALERIA && resultCode == RESULT_OK && data != null && data.getData() != null) {
 
-            String caminhoImagem [] = {MediaStore.Images.Media.DATA};
+            // Aqui o uri ja tem o caminho
+            enderecoImagem = data.getData();
+            // Picasso vai converter e por no image view
 
-            Cursor cursor = getContentResolver().query(uriImagem,caminhoImagem,null,null,null);
-            cursor.moveToFirst();
-            int indiceDoCaminho = cursor.getColumnIndex(caminhoImagem[0]);
-            String caminhoFoto = cursor.getString(indiceDoCaminho);
-            cursor.close();
-            Bitmap scannerImagem =(BitmapFactory.decodeFile(caminhoFoto)) ;
-            imagemCarregada.setImageBitmap(scannerImagem);
+            Picasso.with(this).load(enderecoImagem).into(imagemCarregada);
+
 
         }
-
-        if (requestCode==IMAGEMCAMERA && resultCode == RESULT_OK){
-          Bundle bundle = data.getExtras();
-          Bitmap bitmap = (Bitmap) bundle.get("data");
-          imagemCarregada.setImageBitmap(bitmap);
-
-        }
-        
-        
-        
     }
     
    public void uploadFireBase (){
@@ -400,23 +436,49 @@ public class HomeActivity extends AppCompatActivity {
         
    }
    
-   void capturaImageFireBase () throws IOException {
+    void uploadImagem (){
 
+        if (enderecoImagem!=null){
 
-       File localFile = File.createTempFile("images", "jpg");
-       mStorageRef.getFile(localFile)
-               .addOnSuccessListener(new OnSuccessListener<FileDownloadTask.TaskSnapshot>() {
-                   @Override
-                   public void onSuccess(FileDownloadTask.TaskSnapshot taskSnapshot) {
-                       // Successfully downloaded data to local file
-                       // ...
-                   }
-               }).addOnFailureListener(new OnFailureListener() {
-           @Override
-           public void onFailure(@NonNull Exception exception) {
-               // Handle failed download
-               // ...
-           }
-       });
+        StorageReference fileRef = mStorageRef.child("FAJImage"+System.currentTimeMillis()+"."+retornaFormato(enderecoImagem));
+            myUploadTask = fileRef.putFile(enderecoImagem).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                    Handler handler = new Handler();
+                    handler.postDelayed(new Runnable() {
+                        @Override
+                        public void run() {
+                       progressBar.setProgress(0);
+                        }
+                    },500);
+                    Toast.makeText(HomeActivity.this, "Carregada com sucesso", Toast.LENGTH_SHORT).show();
+                Post p = new Post("a","b",taskSnapshot.getDownloadUrl().toString());
+               String idFoto =  mDatabaseRef.push().getKey();
+              mDatabaseRef.child(idFoto).setValue(p);
+                    alertDialog.hide();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(HomeActivity.this, "Falha de rede ", Toast.LENGTH_SHORT).show();
+                }
+            }).addOnProgressListener(new OnProgressListener<UploadTask.TaskSnapshot>() {
+                @Override
+                public void onProgress(UploadTask.TaskSnapshot taskSnapshot) {
+                    double progresso = 100.0 * taskSnapshot.getBytesTransferred() / taskSnapshot.getTotalByteCount();
+                    progressBar.setProgress((int) progresso);
+
+                }
+            });
+        }
+
    }
+
+   private  String retornaFormato(Uri uri){
+
+       ContentResolver cr = getContentResolver();
+       MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+       return mimeTypeMap.getExtensionFromMimeType(cr.getType(uri));
+   }
+
 }

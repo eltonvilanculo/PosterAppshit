@@ -1,12 +1,15 @@
 package com.example.nameless.posterappshit;
 
 import android.content.Context;
+import android.net.Uri;
 import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
 import android.widget.ImageView;
 import android.widget.TextView;
+
+import com.squareup.picasso.Picasso;
 
 import java.util.List;
 import java.util.Vector;
@@ -19,7 +22,12 @@ public class PostNewAdapter extends RecyclerView.Adapter<PostNewAdapter.MyViewHo
 
     private List<Post> listaPosts;
     private LayoutInflater inflater;
+    Context context;
 
+    public PostNewAdapter(List<Post> listaPosts, Context context) {
+        this.listaPosts = listaPosts;
+        this.context = context;
+    }
 
     public PostNewAdapter(Context context) {
         this.listaPosts = new Vector<>();
@@ -74,8 +82,16 @@ public class PostNewAdapter extends RecyclerView.Adapter<PostNewAdapter.MyViewHo
             this.nomeUsuario.setText(postActual.getSender());
             this.statusFoto.setText(postActual.getText());
             if (postActual.getPhotoUri() != null) {
-                this.imageProfile.setImageURI(postActual.getPhotoUri());
+
+                Picasso.with(context).load(postActual.getPhotoUri())
+                        .fit()
+                        .centerCrop()
+                        .into(imageProfile);
+
+                //this.imageProfile.setImageURI(Uri.parse(postActual.getPhotoUri()));
             }
+
+
 
             this.position = position;
             this.postActual = postActual;

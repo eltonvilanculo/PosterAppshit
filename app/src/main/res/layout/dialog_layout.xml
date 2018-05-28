@@ -6,7 +6,15 @@
     android:orientation="vertical"
     android:background="@android:color/white">
 
+    <ProgressBar
 
+        android:layout_width="match_parent"
+        android:layout_height="wrap_content"
+        android:id="@+id/progressBarUpload"
+        style="@style/Widget.AppCompat.ProgressBar.Horizontal"
+
+        android:layout_marginTop="10dp"
+        />
     <ImageView
         android:id="@+id/imagemCarregada"
         android:layout_width="match_parent"

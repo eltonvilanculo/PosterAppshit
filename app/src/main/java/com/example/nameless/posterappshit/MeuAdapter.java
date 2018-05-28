@@ -9,6 +9,7 @@ import android.widget.ImageView;
 import android.widget.TextView;
 import android.widget.Toast;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -23,13 +24,19 @@ public class MeuAdapter extends RecyclerView.Adapter<MeuAdapter.MyViewHolder> {
 
     private List<User> listaUsuarios;
     private LayoutInflater inflater;
-
+    Context context;
 
     // Construtor de meu adapter
     public MeuAdapter(Context context) {
         this.listaUsuarios = new Vector<>();
         inflater = LayoutInflater.from(context);
     }
+
+    public MeuAdapter( Context context,List<User> listaUsuarios) {
+        this.listaUsuarios = listaUsuarios;
+        this.context = context;
+    }
+
     public void add(User usuario){
         listaUsuarios.add(usuario);
         notifyDataSetChanged();

@@ -15,12 +15,72 @@
       },
       "oauth_client": [
         {
+          "client_id": "183749657801-gf27pepa42pbfj5ppcvigrd2d7q0j0hu.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "com.example.nameless.posterappshit",
+            "certificate_hash": "b9be4b1be0ef7a91edef0df76c5abd1c86075196"
+          }
+        },
+        {
           "client_id": "183749657801-6bt9n6ha9kd6956dhdqou3jgdov21kr5.apps.googleusercontent.com",
           "client_type": 1,
           "android_info": {
             "package_name": "com.example.nameless.posterappshit",
             "certificate_hash": "651aec93d7141664de1f5645ea4467505725440a"
           }
+        },
+        {
+          "client_id": "183749657801-j9f1lt5oga90isj0q25mvh7denjopa8m.apps.googleusercontent.com",
+          "client_type": 3
+        },
+        {
+          "client_id": "183749657801-j9f1lt5oga90isj0q25mvh7denjopa8m.apps.googleusercontent.com",
+          "client_type": 3
+        }
+      ],
+      "api_key": [
+        {
+          "current_key": "AIzaSyAkMbsaFM9pl71z0-rHMJdSIup3ZA_EHvM"
+        }
+      ],
+      "services": {
+        "analytics_service": {
+          "status": 1
+        },
+        "appinvite_service": {
+          "status": 2,
+          "other_platform_oauth_client": [
+            {
+              "client_id": "183749657801-j9f1lt5oga90isj0q25mvh7denjopa8m.apps.googleusercontent.com",
+              "client_type": 3
+            }
+          ]
+        },
+        "ads_service": {
+          "status": 2
+        }
+      }
+    },
+    {
+      "client_info": {
+        "mobilesdk_app_id": "1:183749657801:android:699a20fc8829af4e",
+        "android_client_info": {
+          "package_name": "mz.co.example.sutui.storagefirebase"
+        }
+      },
+      "oauth_client": [
+        {
+          "client_id": "183749657801-61fok1di5r6eq9rpqjpqvagg4alo3ge0.apps.googleusercontent.com",
+          "client_type": 1,
+          "android_info": {
+            "package_name": "mz.co.example.sutui.storagefirebase",
+            "certificate_hash": "b9be4b1be0ef7a91edef0df76c5abd1c86075196"
+          }
+        },
+        {
+          "client_id": "183749657801-j9f1lt5oga90isj0q25mvh7denjopa8m.apps.googleusercontent.com",
+          "client_type": 3
         },
         {
           "client_id": "183749657801-j9f1lt5oga90isj0q25mvh7denjopa8m.apps.googleusercontent.com",

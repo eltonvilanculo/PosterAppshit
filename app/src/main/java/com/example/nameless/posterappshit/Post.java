@@ -12,16 +12,16 @@ public class  Post {
     private String text;
     private long date;
     private String sender;
-    private Uri photoUri;
+    private String photoUri;
 
 
-    public Post(String text, String sender, Uri photoUri) {
+    public Post(String text, String sender, String photoUri) {
         this.text = text;
         this.sender = sender;
         this.photoUri = photoUri;
     }
 
-    public Post(String text, long date, String sender, Uri photoUri) {
+    public Post(String text, long date, String sender, String photoUri) {
         this.text = text;
         this.date = date;
         this.sender = sender;
@@ -55,11 +55,11 @@ public class  Post {
         this.sender = sender;
     }
 
-    public Uri getPhotoUri() {
+    public String getPhotoUri() {
         return photoUri;
     }
 
-    public void setPhotoUri(Uri photoUri) {
+    public void setPhotoUri(String photoUri) {
         this.photoUri = photoUri;
     }
 }
