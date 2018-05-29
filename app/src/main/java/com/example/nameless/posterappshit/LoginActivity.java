@@ -80,53 +80,10 @@ public class LoginActivity extends AppCompatActivity {
         startActivity(chamarRegistar);
     }
 
-    public void addUser(User user) {
-        System.out.println(user);
-        Task<Void> task = contactReference.child(user.getUsername()).setValue(user);
-        if (!task.isSuccessful())
-            Toast.makeText(this, "Not Possible to create the User. try again later", Toast.LENGTH_SHORT).show();
 
-
-    }
-
-    private void createUser(final String email , final String password, final String username) {
-        System.out.println("email = [" + email + "], username = [" + username + "], password = [" + password + "]");
-        mAuth.createUserWithEmailAndPassword(email, password)
-                .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
-                    @Override
-                    public void onComplete(@NonNull Task<AuthResult> task) {
-                        if (task.isSuccessful()) {
-                            // Sign in success, update UI with the signed-in firebaseUser's information
-                            Log.d(TAG, "createUserWithEmail:success");
-
-
-
-
-
-                            loginUser(email,password);
-                            User user = new User(username, email, firebaseUser.getUid());
-                            addUser(user);
-
-                            if (firebaseUser !=null) {
-                                UserProfileChangeRequest userProfileChangeRequest = new UserProfileChangeRequest.Builder().setDisplayName(username).build();
-                                firebaseUser.updateProfile(userProfileChangeRequest);
-                            }
-
-                        } else {
-                            // If sign in fails, display a message to the firebaseUser.
-                            Log.w(TAG, "createUserWithEmail:failure", task.getException());
-                            Toast.makeText(LoginActivity.this, "Authentication failed.",
-                                    Toast.LENGTH_SHORT).show();
-                            //updateUI(null);
-                        }
-
-                        // ...
-                    }
-                });
-    }
 
     private void loginUser(final String email, final String password) {
-        mAuth.signInWithEmailAndPassword(email, password)
+        mAuth.signInWithEmailAndPassword(email.trim(), password.trim())
                 .addOnCompleteListener(this, new OnCompleteListener<AuthResult>() {
                     @Override
                     public void onComplete(@NonNull Task<AuthResult> task) {
@@ -140,6 +97,7 @@ public class LoginActivity extends AppCompatActivity {
                         } else {
                             // If sign in fails, display a message to the firebaseUser.
                             Log.w(TAG, "signInWithEmail:failure", task.getException());
+                            System.out.println("email = " + email + "password = " + password);
                             Toast.makeText(LoginActivity.this, "Authentication failed.",
                                     Toast.LENGTH_SHORT).show();
                             //updateUI(null);
@@ -152,7 +110,7 @@ public class LoginActivity extends AppCompatActivity {
     }
 
     private void goToCOntactList() {
-        Intent intent = new Intent(this, MainActivity.class);
+        Intent intent = new Intent(this, HomeActivity.class);
         intent.putExtra("NAME", firebaseUser.getDisplayName());
         intent.putExtra("EMAIL", firebaseUser.getEmail());
         startActivity(intent);
@@ -163,7 +121,7 @@ public class LoginActivity extends AppCompatActivity {
 
         boolean isValid = true;
 
-        if (email.getText().toString().isEmpty()) {
+/*        if (email.getText().toString().isEmpty()) {
             inputEmail.setError("O campo do email nao pode estar vazio ");
             isValid = false;
         } else {
@@ -184,7 +142,8 @@ public class LoginActivity extends AppCompatActivity {
             return true;
         }else{
        return false;
-        }
+        }*/
+return true;
    }
 
 }

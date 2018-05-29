@@ -4,12 +4,8 @@ import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
 import android.content.Intent;
-import android.database.Cursor;
-import android.graphics.Bitmap;
-import android.graphics.BitmapFactory;
 import android.net.Uri;
 import android.os.Build;
-import android.os.Handler;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
@@ -17,17 +13,14 @@ import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
-import android.util.Log;
 import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
-import android.widget.Button;
 import android.widget.EditText;
 import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
-import android.widget.ListView;
 import android.widget.ProgressBar;
 import android.widget.TabHost;
 import android.widget.TextView;
@@ -35,12 +28,12 @@ import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
 import com.google.android.gms.tasks.OnSuccessListener;
+import com.google.firebase.database.ChildEventListener;
 import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
 import com.google.firebase.database.ValueEventListener;
-import com.google.firebase.storage.FileDownloadTask;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -49,25 +42,22 @@ import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
 import java.io.File;
-import java.io.IOException;
 import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
-import java.util.Vector;
 
 public class HomeActivity extends AppCompatActivity {
     private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    private DatabaseReference usersReference, anonimousPostReference, publicPostRef;
-    LinearLayout layoutprincipal ;
-    FrameLayout frameLayout ;
-    public  TextView capturador;
+    private DatabaseReference userRef, anoPostRef;
+    LinearLayout layoutprincipal;
+    FrameLayout frameLayout;
+    public TextView capturador;
     public static UserAdapter userAdapter;
     private LinearLayout feedLayout;
-    private  final  int IMAGEMGALERIA=1;
-    private  final  int IMAGEMCAMERA=2;
+    private final int IMAGEMGALERIA = 1;
+    private final int IMAGEMCAMERA = 2;
     Uri enderecoImagem;
     ProgressBar progressBar;
-    private  final  String FOLDERFIREBASEIMAGE ="FAJFOTOS";
+    private final String FOLDERFIREBASEIMAGE = "FAJFOTOS";
     ArrayList<Post> listaDownload;
     // Inicializacao do local onde ira ficar a foto carregada
     Post post;
@@ -84,9 +74,8 @@ public class HomeActivity extends AppCompatActivity {
     StorageTask myUploadTask;
 
 
-
     // --------------------------------------
-    ImageView imagemCarregada ;
+    ImageView imagemCarregada;
 
 
     @SuppressLint({"ResourceAsColor", "WrongViewCast"})
@@ -97,7 +86,7 @@ public class HomeActivity extends AppCompatActivity {
         //Cloud Storage 
 
         mStorageRef = FirebaseStorage.getInstance().getReference(FOLDERFIREBASEIMAGE);
-        mDatabaseRef= FirebaseDatabase.getInstance().getReference(FOLDERFIREBASEIMAGE);
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference(FOLDERFIREBASEIMAGE);
 
         listaDownload = new ArrayList<>();
 
@@ -105,13 +94,13 @@ public class HomeActivity extends AppCompatActivity {
             @Override
             public void onDataChange(DataSnapshot dataSnapshot) {
 
-                for(DataSnapshot dataPost : dataSnapshot.getChildren()){
+                for (DataSnapshot dataPost : dataSnapshot.getChildren()) {
 
-                Post post = dataPost.getValue(Post.class);
-                listaDownload.add(post);
+                    Post post = dataPost.getValue(Post.class);
+                    listaDownload.add(post);
 
                 }
-               // meuAdapter = new MeuAdapter(listaDownload,HomeActivity.this);
+                // meuAdapter = new MeuAdapter(listaDownload,HomeActivity.this);
             }
 
             @Override
@@ -121,14 +110,14 @@ public class HomeActivity extends AppCompatActivity {
         });
         // Toolbar config
 
-        
+
         layoutprincipal = (LinearLayout) findViewById(R.id.layoutPrincipal);
         setContentView(R.layout.activity_home);
-        android.support.v7.widget.Toolbar toolbar =(android.support.v7.widget.Toolbar) findViewById(R.id.toolBarFeed);
+        android.support.v7.widget.Toolbar toolbar = (android.support.v7.widget.Toolbar) findViewById(R.id.toolBarFeed);
         toolbar.setTitle(" FAJ Five");
         //toolbar.setTitleTextColor(R.color.colorT);
 
-        if (Build.VERSION.SDK_INT>=Build.VERSION_CODES.LOLLIPOP){
+        if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.LOLLIPOP) {
             toolbar.setElevation(10f);
             toolbar.setFocusable(true);
         }
@@ -176,15 +165,12 @@ public class HomeActivity extends AppCompatActivity {
         recycle5.setItemAnimator(new DefaultItemAnimator());
 
 
-
-
         TabHost tabHost = (TabHost) findViewById(R.id.tabHost);
         tabHost.setup();
 
         TabHost.TabSpec aba1 = tabHost.newTabSpec("PRIMEIRA");
         aba1.setContent(R.id.feeding_area);
         aba1.setIndicator("FAJ NOTICIAS");
-
 
 
         TabHost.TabSpec aba2 = tabHost.newTabSpec("SEGUNDA");
@@ -199,70 +185,32 @@ public class HomeActivity extends AppCompatActivity {
         tabHost.addTab(aba2);
         tabHost.addTab(aba3);
 
-
-        usersReference = firebaseDatabase.getReference(BDCaminhos.USER);
-        anonimousPostReference = firebaseDatabase.getReference(BDCaminhos.POSTS_ANONIMOS);
-
-        //listContacts = findViewById(R.id.list_view_contact);
-
-        //userAdapter = new UserAdapter(getLayoutInflater());
-        //listContacts.setAdapter(userAdapter);
-      //  feedLayout = findViewById(R.id.feeding_area);
-
-        anonimousPostReference.addValueEventListener(new ValueEventListener() {
+        userRef = FirebaseDatabase.getInstance().getReference(BDCaminhos.USER);
+        userRef.addChildEventListener(new ChildEventListener() {
             @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                User value = dataSnapshot.getValue(User.class);
+                meuAdapter.add(value);
+            }
 
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    post = data.getValue(Post.class);
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
 
-                 meteNoSQL(post);
+            }
 
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
 
-                    if (!postNewAdapter.getList().contains(post)) {
-                        postNewAdapter.add(post);
-                    } else {
-                        //listaUsuarios.update(value);
-                    }
-                    //capturador = new TextView(HomeActivity.this);
-                    //capturador.setText("De: "+post.getSender()+"\n Mensagem:    " + post.getText().toString() + "\n Data:   " + new Date(post.getDate()).toString());
-                  //  feedLayout.addView(capturador);
-                }
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
             }
 
             @Override
             public void onCancelled(DatabaseError databaseError) {
-
-            }
-        });
-
-        usersReference.addValueEventListener(new ValueEventListener() {
-
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-                // This method is called once with the initial value and again
-                // whenever data at this location is updated.
-                for (DataSnapshot data : dataSnapshot.getChildren()) {
-                    User value = data.getValue(User.class);
-
-                    Log.d("Initial DB Reading", "Value of key is: " + dataSnapshot.getChildren());
-                    Log.d("Initial DB Reading", "Value of capturador is: " + value);
-                    if (!meuAdapter.getList().contains(value)) {
-                        meuAdapter.add(value);
-                    } else {
-                        //listaUsuarios.update(value);
-                    }
-
-                    Log.d("Initial DB Reading", "Map value creation :" + meuAdapter.getList());
-                }
-
-
-            }
-
-            @Override
-            public void onCancelled(DatabaseError error) {
-                // Failed to read value
-                Log.w("Initial DB Reading", "Failed to read value.", error.toException());
+                Toast.makeText(HomeActivity.this, "Erro: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
 
@@ -301,20 +249,21 @@ public class HomeActivity extends AppCompatActivity {
 
         Toast.makeText(HomeActivity.this, "Estou chateado", Toast.LENGTH_SHORT).show();
     }
+
     public void verificarSettings(MenuItem item) {
-        Toast.makeText(HomeActivity.this,"Comming soon",Toast.LENGTH_LONG).show();
-    }
-    public void verificarUs(MenuItem item) {
-        Toast.makeText(HomeActivity.this,"Comming soon",Toast.LENGTH_LONG).show();
-    }
-    public void verificarLogout(MenuItem item) {
-        Toast.makeText(HomeActivity.this,"Comming soon",Toast.LENGTH_LONG).show();
+        Toast.makeText(HomeActivity.this, "Comming soon", Toast.LENGTH_LONG).show();
     }
 
+    public void verificarUs(MenuItem item) {
+        Toast.makeText(HomeActivity.this, "Comming soon", Toast.LENGTH_LONG).show();
+    }
+
+    public void verificarLogout(MenuItem item) {
+        Toast.makeText(HomeActivity.this, "Comming soon", Toast.LENGTH_LONG).show();
+    }
 
 
     public void postarMensagem(View view) {
-
 
 
         alertBuilder = new AlertDialog.Builder(HomeActivity.this);
@@ -326,7 +275,7 @@ public class HomeActivity extends AppCompatActivity {
         // Inicializacao do imageView que ficara a imagem carregada
         imagemCarregada = customView.findViewById(R.id.imagemCarregada);
 
-       // Inicializacao dos botoes do post
+        // Inicializacao dos botoes do post
         ImageButton accept = customView.findViewById(R.id.accept_dialog_btn);
         ImageButton acessoGaleria = customView.findViewById(R.id.acessoGaleria);
         ImageButton acessoCamera = customView.findViewById(R.id.acessoCamera);
@@ -334,33 +283,28 @@ public class HomeActivity extends AppCompatActivity {
         final EditText text = customView.findViewById(R.id.input_text_dialog_post);
 
         //progress bar
-        progressBar=customView.findViewById(R.id.progressBarUpload);
+        progressBar = customView.findViewById(R.id.progressBarUpload);
 
 
         //listDialogContact.setAdapter(userAdapter);
 
         alertBuilder.setView(customView);
-         alertDialog = alertBuilder.create();
+        alertDialog = alertBuilder.create();
         alertDialog.show();
 
         accept.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-             if (myUploadTask!=null && myUploadTask.isInProgress()){ Toast.makeText(HomeActivity.this, "Processando...", Toast.LENGTH_SHORT).show();
-             }
+                post = new Post();
+                post.setText(text.getEditableText().toString());
+                post.setDate(System.currentTimeMillis());
+                post.setSender(getPostSender());
 
-             else uploadImagem();
-
-                 Post post = new Post();
-                 post.setDate(System.currentTimeMillis());
-                 post.setSender(getString(R.string.usuarioAnonimo));
-                 // post.setSender(LoginActivity.firebaseUser.getDisplayName());
-                 post.setText(text.getEditableText().toString());
-
-                 anonimousPostReference.child(new Date(post.getDate()).toString()).setValue(post);
-
-
-                 text.setText("");
+                if (enderecoImagem != null) {
+                    if (myUploadTask != null && myUploadTask.isInProgress()) {
+                        Toast.makeText(HomeActivity.this, "Processando...", Toast.LENGTH_SHORT).show();
+                    } else uploadImagem();
+                } else postarParaFireBase(null);
 
             }
         });
@@ -371,9 +315,9 @@ public class HomeActivity extends AppCompatActivity {
             public void onClick(View v) {
                 Intent intentCamera = new Intent(MediaStore.ACTION_IMAGE_CAPTURE);
 
-                if (intentCamera.resolveActivity(getPackageManager())!=null){
+                if (intentCamera.resolveActivity(getPackageManager()) != null) {
 
-                startActivityForResult(intentCamera,IMAGEMCAMERA);
+                    startActivityForResult(intentCamera, IMAGEMCAMERA);
                 }
             }
         });
@@ -384,14 +328,22 @@ public class HomeActivity extends AppCompatActivity {
                 Intent intent = new Intent();
                 intent.setType("image/*");
                 intent.setAction(Intent.ACTION_GET_CONTENT);
-                startActivityForResult(intent,IMAGEMGALERIA);
+                startActivityForResult(intent, IMAGEMGALERIA);
                 //PEDIR identifica o nosso pedido
             }
         });
 
 
+    }
 
-
+    private String getPostSender() {
+        for (User user : meuAdapter.getList()) {
+            if (user.getUid().equals(LoginActivity.firebaseUser.getUid())){
+                return user.getUsername();
+            }
+        }
+        Toast.makeText(this, "Usuario nao Existe!", Toast.LENGTH_SHORT).show();
+        return null;
     }
 
     @Override
@@ -410,54 +362,51 @@ public class HomeActivity extends AppCompatActivity {
 
         }
     }
-    
-   public void uploadFireBase (){
+
+    public void upload2FireBase() {
 
 
-       Uri file = Uri.fromFile(new File("path/to/images/rivers.jpg"));
-       StorageReference storageRef = null;
-       StorageReference riversRef = storageRef.child("images/rivers.jpg");
+        Uri file = Uri.fromFile(new File("path/to/images/rivers.jpg"));
+        StorageReference storageRef = null;
+        StorageReference riversRef = storageRef.child("images/rivers.jpg");
 
-       riversRef.putFile(file)
-               .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                   @Override
-                   public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                       // Get a URL to the uploaded content
-                       Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                   }
-               })
-               .addOnFailureListener(new OnFailureListener() {
-                   @Override
-                   public void onFailure(@NonNull Exception exception) {
-                       // Handle unsuccessful uploads
-                       // ...
-                   }
-               });
-        
-   }
-   
-    void uploadImagem (){
+        riversRef.putFile(file)
+                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+                    @Override
+                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
+                        // Get a URL to the uploaded content
+                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
+                    }
+                })
+                .addOnFailureListener(new OnFailureListener() {
+                    @Override
+                    public void onFailure(@NonNull Exception exception) {
+                        // Handle unsuccessful uploads
+                        // ...
+                    }
+                });
 
-        if (enderecoImagem!=null){
+    }
 
-        StorageReference fileRef = mStorageRef.child("FAJImage"+System.currentTimeMillis()+"."+retornaFormato(enderecoImagem));
-            myUploadTask = fileRef.putFile(enderecoImagem).addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
+    void uploadImagem() {
+
+        if (enderecoImagem != null) {
+
+            StorageReference fileRef = mStorageRef.child("FAJImage" + System.currentTimeMillis() + "." + retornaFormato(enderecoImagem));
+            myUploadTask = fileRef.putFile(enderecoImagem).addOnSuccessListener(this, new OnSuccessListener<UploadTask.TaskSnapshot>() {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                    Handler handler = new Handler();
-                    handler.postDelayed(new Runnable() {
-                        @Override
-                        public void run() {
-                       progressBar.setProgress(0);
-                        }
-                    },500);
-                    Toast.makeText(HomeActivity.this, "Carregada com sucesso", Toast.LENGTH_SHORT).show();
-                Post p = new Post("a","b",taskSnapshot.getDownloadUrl().toString());
-               String idFoto =  mDatabaseRef.push().getKey();
-              mDatabaseRef.child(idFoto).setValue(p);
+                    try {
+                        Thread.sleep(500);
+                    } catch (InterruptedException e) {
+                        e.printStackTrace();
+                    }
+                    postarParaFireBase(taskSnapshot.getDownloadUrl());
+                    progressBar.setProgress(0);
                     alertDialog.hide();
+
                 }
-            }).addOnFailureListener(new OnFailureListener() {
+            }).addOnFailureListener(this, new OnFailureListener() {
                 @Override
                 public void onFailure(@NonNull Exception e) {
                     Toast.makeText(HomeActivity.this, "Falha de rede ", Toast.LENGTH_SHORT).show();
@@ -472,13 +421,23 @@ public class HomeActivity extends AppCompatActivity {
             });
         }
 
-   }
+    }
 
-   private  String retornaFormato(Uri uri){
+    private void postarParaFireBase(@NonNull Uri downloadUrl) {
+        if (post != null) {
+            if (downloadUrl != null) {
+                post.setPhotoUri(downloadUrl.toString());
+            }
+            mDatabaseRef.child(new Date(System.currentTimeMillis()).toString()).setValue(post);
+            post = null;
+        }
+    }
 
-       ContentResolver cr = getContentResolver();
-       MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
-       return mimeTypeMap.getExtensionFromMimeType(cr.getType(uri));
-   }
+    private String retornaFormato(Uri uri) {
+
+        ContentResolver cr = getContentResolver();
+        MimeTypeMap mimeTypeMap = MimeTypeMap.getSingleton();
+        return mimeTypeMap.getExtensionFromMimeType(cr.getType(uri));
+    }
 
 }

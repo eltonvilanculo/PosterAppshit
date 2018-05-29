@@ -42,7 +42,7 @@ public class PostNewAdapter extends RecyclerView.Adapter<PostNewAdapter.MyViewHo
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = inflater.inflate(R.layout.cardview_item,parent,false);
-         MyViewHolder holder = new MyViewHolder(view);
+        PostNewAdapter.MyViewHolder holder = new PostNewAdapter.MyViewHolder(view);
         return holder;
     }
 
@@ -50,7 +50,13 @@ public class PostNewAdapter extends RecyclerView.Adapter<PostNewAdapter.MyViewHo
     public void onBindViewHolder(PostNewAdapter.MyViewHolder holder, int position) {
         Post postActual = listaPosts.get(position);
         holder.setData(postActual,position);
+        /*holder.nomeUsuario.setText(postActual.getSender());
+        holder.statusFoto.setText(postActual.getText());
+*/
+
+
     }
+
 
     @Override
     public int getItemCount() {
@@ -83,12 +89,9 @@ public class PostNewAdapter extends RecyclerView.Adapter<PostNewAdapter.MyViewHo
             this.statusFoto.setText(postActual.getText());
             if (postActual.getPhotoUri() != null) {
 
-                Picasso.with(context).load(postActual.getPhotoUri())
-                        .fit()
-                        .centerCrop()
-                        .into(imageProfile);
-
+              //imageProfile.setImageURI(Uri.parse(postActual.getPhotoUri()));
                 //this.imageProfile.setImageURI(Uri.parse(postActual.getPhotoUri()));
+                Picasso.with(inflater.getContext()).load(postActual.getPhotoUri()).into(this.imageProfile);
             }
 
 

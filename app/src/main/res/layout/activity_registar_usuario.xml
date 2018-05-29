@@ -65,7 +65,7 @@ tools:context="com.example.nameless.posterappshit.RegistarUsuario"
 
 
             <EditText
-                android:id="@+id/email_login_input"
+                android:id="@+id/email_register_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Email"
@@ -84,7 +84,7 @@ tools:context="com.example.nameless.posterappshit.RegistarUsuario"
 
             <EditText
 
-                android:id="@+id/password_login_input"
+                android:id="@+id/password_register_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Senha"
@@ -107,7 +107,7 @@ tools:context="com.example.nameless.posterappshit.RegistarUsuario"
 
             <EditText
                 android:layout_marginTop="10dp"
-                android:id="@+id/password2_login_input"
+                android:id="@+id/password2_register_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:hint="Confirmar senha "

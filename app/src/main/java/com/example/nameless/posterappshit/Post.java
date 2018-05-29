@@ -1,7 +1,5 @@
 package com.example.nameless.posterappshit;
 
-import android.net.Uri;
-
 import com.google.firebase.database.IgnoreExtraProperties;
 
 /**
@@ -12,12 +10,14 @@ public class  Post {
     private String text;
     private long date;
     private String sender;
+    private String receptor;
     private String photoUri;
 
 
-    public Post(String text, String sender, String photoUri) {
+    public Post(String text, String sender, String receptor, String photoUri) {
         this.text = text;
         this.sender = sender;
+        this.receptor = receptor;
         this.photoUri = photoUri;
     }
 
@@ -61,5 +61,13 @@ public class  Post {
 
     public void setPhotoUri(String photoUri) {
         this.photoUri = photoUri;
+    }
+
+    public String getReceptor() {
+        return receptor;
+    }
+
+    public void setReceptor(String receptor) {
+        this.receptor = receptor;
     }
 }

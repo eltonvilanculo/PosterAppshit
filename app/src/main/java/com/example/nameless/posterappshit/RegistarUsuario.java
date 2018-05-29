@@ -45,10 +45,10 @@ public class RegistarUsuario extends AppCompatActivity {
         setContentView(R.layout.activity_registar_usuario);
 
         editNomeUsuario = (EditText) findViewById(R.id.editNomeUsuario);
-        editEmail = (EditText) findViewById(R.id.email_login_input);
-        editPassword = (EditText) findViewById(R.id.password_login_input);
+        editEmail = (EditText) findViewById(R.id.email_register_input);
+        editPassword = (EditText) findViewById(R.id.password_register_input);
 
-        editConfirmPassword = (EditText) findViewById(R.id.password2_login_input);
+        editConfirmPassword = (EditText) findViewById(R.id.password2_register_input);
 
         // inputs
 
