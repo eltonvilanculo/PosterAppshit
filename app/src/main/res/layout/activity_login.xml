@@ -4,12 +4,11 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    tools:context="com.example.nameless.posterappshit.LoginActivity"
-    android:weightSum="100"
-    android:orientation="vertical"
-    android:backgroundTint="@color/common_google_signin_btn_text_dark_default"
     android:background="@drawable/principal2"
-    >
+    android:backgroundTint="@color/common_google_signin_btn_text_dark_default"
+    android:orientation="vertical"
+    android:weightSum="100"
+    tools:context="com.example.nameless.posterappshit.LoginActivity">
 
 
     <LinearLayout
@@ -30,17 +29,16 @@
         android:layout_width="match_parent"
         android:layout_height="0dp"
         android:layout_weight="60"
-        android:orientation="vertical"
         android:backgroundTint="@color/common_google_signin_btn_text_dark_default"
-        >
+        android:orientation="vertical"
+        tools:style="@style/Base.Widget.AppCompat.Button.Borderless">
 
 
         <android.support.design.widget.TextInputLayout
 
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:id="@+id/inputMail"
-            >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
 
             <EditText
@@ -48,28 +46,25 @@
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:ems="10"
-                android:textColorHint="#4a54d2"
                 android:hint="Email"
-                />
-
+                android:textColorHint="#4a54d2" />
 
 
         </android.support.design.widget.TextInputLayout>
 
         <android.support.design.widget.TextInputLayout
 
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
             android:id="@+id/inputPassword"
-            >
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
 
             <EditText
                 android:id="@+id/password_login_input"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
-                android:ems="10"
                 android:layout_marginTop="20dp"
+                android:ems="10"
                 android:hint="Password"
 
                 />
@@ -78,23 +73,38 @@
         </android.support.design.widget.TextInputLayout>
 
 
-
         <LinearLayout
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
             android:layout_marginTop="40dp"
             android:backgroundTint="@color/common_google_signin_btn_text_dark_default"
-            >
+            android:orientation="vertical">
 
             <Button
+
                 android:id="@+id/login_btn"
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"
                 android:onClick="login"
+                android:soundEffectsEnabled="true"
                 android:text="Login"
-                android:backgroundTint="@color/common_google_signin_btn_text_dark_default"
-                />
+                android:theme="@style/Base.Widget.AppCompat.Button.Borderless"
+                android:textColor="@android:color/black"
 
+                android:background="@color/cardview_light_background"
+
+
+
+
+            />
+
+            <Button
+                android:layout_marginTop="10dp"
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:text="Anonimato"
+                android:onClick="loginAnonimo"
+                android:background="@color/cardview_light_background"/>
 
 
         </LinearLayout>
@@ -105,8 +115,9 @@
             android:layout_width="match_parent"
             android:layout_height="0dp"
             android:layout_weight="10"
-            android:orientation="horizontal"
-            android:backgroundTint="@color/common_google_signin_btn_text_dark_default">
+            android:backgroundTint="@color/common_google_signin_btn_text_dark_default"
+
+            android:orientation="horizontal">
 
             <Button
                 android:id="@+id/sign_up_btn"
@@ -125,13 +136,13 @@
         android:id="@+id/show_sign_up"
         android:layout_width="match_parent"
         android:layout_height="wrap_content"
-        android:onClick="showSignUp"
-        android:gravity="center"
-        android:text="Crie uma conta aqui "
-        android:textSize="15sp"
-        android:textColor="@android:color/holo_red_light"
-        android:background="@drawable/shape_effect_login"
         android:backgroundTint="@color/common_google_signin_btn_text_dark_default"
+        android:gravity="center"
+        android:onClick="showSignUp"
+        android:text="Crie uma conta aqui "
+
+        android:textColor="@color/colorAccent"
+        android:textSize="15sp"
 
 
         />

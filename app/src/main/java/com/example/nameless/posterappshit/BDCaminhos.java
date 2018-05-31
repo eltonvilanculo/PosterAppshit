@@ -11,4 +11,5 @@ public class BDCaminhos {
     public static final String POSTS_PUBLICOS = "POSTS_PUBLICOS";
     public static final String COMMENTS = "COMENTARIOS";
     public static final String USER_ANOMINOUS = "Anonimo";
+    static final String FOLDERFIREBASEIMAGE = "FAJFOTOS";
 }

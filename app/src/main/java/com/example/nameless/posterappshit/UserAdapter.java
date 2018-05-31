@@ -1,71 +1,107 @@
 package com.example.nameless.posterappshit;
 
-import android.util.Log;
+import android.content.Context;
+import android.support.v7.widget.RecyclerView;
 import android.view.LayoutInflater;
 import android.view.View;
 import android.view.ViewGroup;
-import android.widget.BaseAdapter;
+import android.widget.ImageView;
 import android.widget.TextView;
 
-import java.util.ArrayList;
+import java.util.List;
+import java.util.Vector;
 
 /**
- * Created by Nameless on 5/9/2018.
+ * Created by Nameless on 5/21/2018.
  */
-class UserAdapter extends BaseAdapter {
-    ArrayList<User> users = new ArrayList<>();
+
+// MyViewHolder esta dentro do UserAdapter
+
+public class UserAdapter extends RecyclerView.Adapter<UserAdapter.MyViewHolder> {
+
+
+    private List<User> listaUsuarios;
     private LayoutInflater inflater;
+    Context context;
 
-    public UserAdapter(LayoutInflater inflater) {
-        Log.d("UserAdapter", "default constructor");
-        this.inflater = inflater;
-
+    // Construtor de meu adapter
+    public UserAdapter(Context context) {
+        this.listaUsuarios = new Vector<>();
+        inflater = LayoutInflater.from(context);
     }
 
-    public void add(User user) {
-        users.add(user);
-       this.notifyDataSetChanged();
+    public UserAdapter(Context context, List<User> listaUsuarios) {
+        this.listaUsuarios = listaUsuarios;
+        this.context = context;
     }
 
-    ArrayList<User> getList() {
-        return users;
-    }
-
-    @Override
-    public int getCount() {
-        return users.size();
+    public void add(User usuario){
+        listaUsuarios.add(usuario);
+        notifyDataSetChanged();
     }
 
     @Override
-    public Object getItem(int position) {
-        return users.get(position);
-    }
+    public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
+      View view = inflater.inflate(R.layout.list_item,parent,false);
+      MyViewHolder holder = new MyViewHolder(view);
+      return holder;
 
-
-    @Override
-    public long getItemId(int position) {
-        return position;
     }
 
     @Override
-    public View getView(int position, View convertView, ViewGroup parent) {
-        View view = inflater.inflate(R.layout.user_view, parent, false);
-        TextView name = view.findViewById(R.id.user_name_user);
-        TextView email = view.findViewById(R.id.user_email);
+    public void onBindViewHolder(MyViewHolder holder, int position) {
 
-        name.setText(users.get(position).getUsername());
-        email.setText(users.get(position).getEmail());
-
-        return view;
+        User usaurioActual = listaUsuarios.get(position);
+        holder.setData(usaurioActual,position);
     }
 
-    public void update(User user) {
-        for (int i = 0; i < users.size(); i++) {
-            if (users.get(i).equals(user)) {
-                users.remove(i);
-                users.add(i, user);
+    @Override
+    public int getItemCount() {
+        return listaUsuarios.size();
+    }
+
+    public List<User> getList() {
+        return listaUsuarios;
+    }
+
+    class MyViewHolder extends  RecyclerView.ViewHolder{
+
+        // Inicializar componentes
+
+        ImageView imageProfile ;
+        TextView nomeUsuario;
+        private int position;
+        User usuarioActual ;
+
+
+
+            public MyViewHolder(View itemView) {
+                super(itemView);
+
+                nomeUsuario = (TextView) itemView.findViewById(R.id.nomeUsuario);
+                imageProfile = (ImageView) itemView.findViewById(R.id.imageProfile);
+
+
             }
+
+        public void setData(User usaurioActual, int position) {
+
+                this.nomeUsuario.setText(usaurioActual.getUsername());
+            if (usaurioActual.getPhotoUri() != null) {
+                this.imageProfile.setImageURI(usaurioActual.getPhotoUri());
+            }
+
+                this.position = position;
+                this.usuarioActual = usaurioActual;
+//                notifyDataSetChanged();
+
+                //listaUsuarios.add(position,usaurioActual);
+
+
+
         }
-        this.notifyDataSetChanged();
+
+
     }
+
 }

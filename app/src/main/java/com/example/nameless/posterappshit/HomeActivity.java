@@ -3,13 +3,16 @@ package com.example.nameless.posterappshit;
 import android.annotation.SuppressLint;
 import android.app.AlertDialog;
 import android.content.ContentResolver;
+import android.content.ContentValues;
 import android.content.Intent;
+import android.database.Cursor;
+import android.database.sqlite.SQLiteDatabase;
 import android.net.Uri;
 import android.os.Build;
+import android.os.Bundle;
 import android.provider.MediaStore;
 import android.support.annotation.NonNull;
 import android.support.v7.app.AppCompatActivity;
-import android.os.Bundle;
 import android.support.v7.widget.DefaultItemAnimator;
 import android.support.v7.widget.LinearLayoutManager;
 import android.support.v7.widget.RecyclerView;
@@ -17,13 +20,11 @@ import android.view.MenuItem;
 import android.view.View;
 import android.webkit.MimeTypeMap;
 import android.widget.EditText;
-import android.widget.FrameLayout;
 import android.widget.ImageButton;
 import android.widget.ImageView;
 import android.widget.LinearLayout;
 import android.widget.ProgressBar;
 import android.widget.TabHost;
-import android.widget.TextView;
 import android.widget.Toast;
 
 import com.google.android.gms.tasks.OnFailureListener;
@@ -33,7 +34,6 @@ import com.google.firebase.database.DataSnapshot;
 import com.google.firebase.database.DatabaseError;
 import com.google.firebase.database.DatabaseReference;
 import com.google.firebase.database.FirebaseDatabase;
-import com.google.firebase.database.ValueEventListener;
 import com.google.firebase.storage.FirebaseStorage;
 import com.google.firebase.storage.OnProgressListener;
 import com.google.firebase.storage.StorageReference;
@@ -41,34 +41,29 @@ import com.google.firebase.storage.StorageTask;
 import com.google.firebase.storage.UploadTask;
 import com.squareup.picasso.Picasso;
 
-import java.io.File;
 import java.util.ArrayList;
 import java.util.Date;
 
 public class HomeActivity extends AppCompatActivity {
-    private FirebaseDatabase firebaseDatabase = FirebaseDatabase.getInstance();
-    private DatabaseReference userRef, anoPostRef;
+    private DatabaseReference userRef;
     LinearLayout layoutprincipal;
-    FrameLayout frameLayout;
-    public TextView capturador;
-    public static UserAdapter userAdapter;
-    private LinearLayout feedLayout;
     private final int IMAGEMGALERIA = 1;
     private final int IMAGEMCAMERA = 2;
     Uri enderecoImagem;
     ProgressBar progressBar;
-    private final String FOLDERFIREBASEIMAGE = "FAJFOTOS";
     ArrayList<Post> listaDownload;
     // Inicializacao do local onde ira ficar a foto carregada
     Post post;
     // Cloud Storage
-    PostNewAdapter postNewAdapter;
-    MeuAdapter meuAdapter;
+    PostAdapter postAdapter;
+    UserAdapter userAdapter;
     AlertDialog.Builder alertBuilder;
     AlertDialog alertDialog;
 
     private StorageReference mStorageRef;
     private DatabaseReference mDatabaseRef;
+
+    private User user;
 
     //Verifica se o upload esta' completo na base de dado
     StorageTask myUploadTask;
@@ -76,6 +71,9 @@ public class HomeActivity extends AppCompatActivity {
 
     // --------------------------------------
     ImageView imagemCarregada;
+    private SQLiteDatabase dataHelper;
+    private String ANONIMO = "anonimo";
+    private String QUALQUER = "qualquer";
 
 
     @SuppressLint({"ResourceAsColor", "WrongViewCast"})
@@ -84,32 +82,40 @@ public class HomeActivity extends AppCompatActivity {
         super.onCreate(savedInstanceState);
 
         //Cloud Storage 
+        userRef = FirebaseDatabase.getInstance().getReference(BDCaminhos.USER);
+        mStorageRef = FirebaseStorage.getInstance().getReference(BDCaminhos.FOLDERFIREBASEIMAGE);
+        mDatabaseRef = FirebaseDatabase.getInstance().getReference(BDCaminhos.FOLDERFIREBASEIMAGE);
 
-        mStorageRef = FirebaseStorage.getInstance().getReference(FOLDERFIREBASEIMAGE);
-        mDatabaseRef = FirebaseDatabase.getInstance().getReference(FOLDERFIREBASEIMAGE);
-
-        listaDownload = new ArrayList<>();
-
-        mDatabaseRef.addValueEventListener(new ValueEventListener() {
-            @Override
-            public void onDataChange(DataSnapshot dataSnapshot) {
-
-                for (DataSnapshot dataPost : dataSnapshot.getChildren()) {
-
-                    Post post = dataPost.getValue(Post.class);
-                    listaDownload.add(post);
-
-                }
-                // meuAdapter = new MeuAdapter(listaDownload,HomeActivity.this);
-            }
-
-            @Override
-            public void onCancelled(DatabaseError databaseError) {
-                Toast.makeText(HomeActivity.this, databaseError.getMessage(), Toast.LENGTH_SHORT).show();
-            }
-        });
         // Toolbar config
 
+        if (!LoginActivity.firebaseUser.isAnonymous()) {
+            userRef.addChildEventListener(new ChildEventListener() {
+                @Override
+                public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                    user = dataSnapshot.child(LoginActivity.firebaseUser.getUid()).getValue(User.class);
+                }
+
+                @Override
+                public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+                }
+
+                @Override
+                public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+                }
+
+                @Override
+                public void onCancelled(DatabaseError databaseError) {
+
+                }
+            });
+        }
 
         layoutprincipal = (LinearLayout) findViewById(R.id.layoutPrincipal);
         setContentView(R.layout.activity_home);
@@ -123,14 +129,18 @@ public class HomeActivity extends AppCompatActivity {
         }
         toolbar.inflateMenu(R.menu.menu_toolbar_config);
         // Framelayout
+        /**
+         *criaco da porra da ligacao com a motherfucking SQ fuckin Lite b!tch!!!
+         */
 
-
+        PostHelper helper = new PostHelper(this);
+        dataHelper = helper.getWritableDatabase();
         // codigo para linkar
 
         //Adapter e RVIew
         RecyclerView recyclerView = (RecyclerView) findViewById(R.id.recycler);
-        meuAdapter = new MeuAdapter(this);
-        recyclerView.setAdapter(meuAdapter);
+        userAdapter = new UserAdapter(this);
+        recyclerView.setAdapter(userAdapter);
 
         //Layout Manager e RVIew
 
@@ -145,12 +155,20 @@ public class HomeActivity extends AppCompatActivity {
 
         //Adapter e RVIew
         RecyclerView recycleFeed = (RecyclerView) findViewById(R.id.recycleFeed);
-        postNewAdapter = new PostNewAdapter(this);
-        recycleFeed.setAdapter(postNewAdapter);
+        if (LoginActivity.firebaseUser.isAnonymous()) {
+            postAdapter = new PostAdapter(this, getAnonimoCursor());
+        } else {
+            postAdapter = new PostAdapter(this, getRegistadoCursor());
+        }
+
+
+        recycleFeed.setAdapter(postAdapter);
 
         RecyclerView recycle5 = (RecyclerView) findViewById(R.id.recycle5);
-        final PostNewAdapter postNewAdapter5 = new PostNewAdapter(this);
-        recycle5.setAdapter(postNewAdapter);
+
+        //PostAdapter postAdapter5 = new PostAdapter(this, getRegistadoCursor());
+
+        //recycle5.setAdapter(postAdapter);
         //Layout Manager e RVIew
 
         LinearLayoutManager linearLayoutManagerFeed = new LinearLayoutManager(this);
@@ -185,12 +203,12 @@ public class HomeActivity extends AppCompatActivity {
         tabHost.addTab(aba2);
         tabHost.addTab(aba3);
 
-        userRef = FirebaseDatabase.getInstance().getReference(BDCaminhos.USER);
+
         userRef.addChildEventListener(new ChildEventListener() {
             @Override
             public void onChildAdded(DataSnapshot dataSnapshot, String s) {
                 User value = dataSnapshot.getValue(User.class);
-                meuAdapter.add(value);
+                userAdapter.add(value);
             }
 
             @Override
@@ -213,30 +231,50 @@ public class HomeActivity extends AppCompatActivity {
                 Toast.makeText(HomeActivity.this, "Erro: " + databaseError.getMessage(), Toast.LENGTH_SHORT).show();
             }
         });
+        mDatabaseRef.addChildEventListener(new ChildEventListener() {
+            @Override
+            public void onChildAdded(DataSnapshot dataSnapshot, String s) {
+                Post value = dataSnapshot.getValue(Post.class);
+                System.out.println("value = " + value.toString());
+                meteNoSQL(value, dataSnapshot.getKey());
+            }
+
+            @Override
+            public void onChildChanged(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onChildRemoved(DataSnapshot dataSnapshot) {
+
+            }
+
+            @Override
+            public void onChildMoved(DataSnapshot dataSnapshot, String s) {
+
+            }
+
+            @Override
+            public void onCancelled(DatabaseError databaseError) {
+
+            }
+        });
 
 
     }
 
-    private void meteNoSQL(Post post) {
-        /**
-         *
-         *
-         *
-         *
-         *
-         *
-         *
-         *
-         *
-         *
-         *
-         *
-         *
-         *
-         *
-         *
-         *
-         * */
+    private void meteNoSQL(Post post, String chave) {
+        ContentValues cv69 = new ContentValues();
+        cv69.put(PostHelper._COLUNA_ID_POST, chave);
+        cv69.put(PostHelper.COLUNA_DATA_POST, post.getDate());
+        cv69.put(PostHelper.COLUNA_TEXTO_POST, post.getText());
+        cv69.put(PostHelper.COLUNA_EMISSOR_POST, post.getSender());
+        cv69.put(PostHelper.COLUNA_RECEPTOR_POST, post.getReceptor());
+        cv69.put(PostHelper.COLUNA_IMAGEM_URI_POST, post.getPhotoUri());
+
+        dataHelper.insertWithOnConflict(PostHelper.TABLE_POST, null, cv69, SQLiteDatabase.CONFLICT_REPLACE);
+
+
     }
 
     @Override
@@ -259,7 +297,11 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void verificarLogout(MenuItem item) {
-        Toast.makeText(HomeActivity.this, "Comming soon", Toast.LENGTH_LONG).show();
+        String nome = item.getTitle().toString();
+        if (!(LoginActivity.firebaseUser.isAnonymous())) {
+            item.setTitle("Logout ( " + user.getUsername() + ")");
+        }
+        item.setTitle("Logout ( " + ANONIMO + ")");
     }
 
 
@@ -298,14 +340,19 @@ public class HomeActivity extends AppCompatActivity {
                 post = new Post();
                 post.setText(text.getEditableText().toString());
                 post.setDate(System.currentTimeMillis());
-                post.setSender(getPostSender());
+
+
+                if (LoginActivity.firebaseUser.isAnonymous()) {
+                    post.setSender(ANONIMO);
+                } else {
+                    //post.setSender(user.getUsername());
+                }
 
                 if (enderecoImagem != null) {
                     if (myUploadTask != null && myUploadTask.isInProgress()) {
                         Toast.makeText(HomeActivity.this, "Processando...", Toast.LENGTH_SHORT).show();
                     } else uploadImagem();
                 } else postarParaFireBase(null);
-
             }
         });
 
@@ -337,8 +384,8 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private String getPostSender() {
-        for (User user : meuAdapter.getList()) {
-            if (user.getUid().equals(LoginActivity.firebaseUser.getUid())){
+        for (User user : userAdapter.getList()) {
+            if (user.getUid().equals(LoginActivity.firebaseUser.getUid())) {
                 return user.getUsername();
             }
         }
@@ -363,31 +410,6 @@ public class HomeActivity extends AppCompatActivity {
         }
     }
 
-    public void upload2FireBase() {
-
-
-        Uri file = Uri.fromFile(new File("path/to/images/rivers.jpg"));
-        StorageReference storageRef = null;
-        StorageReference riversRef = storageRef.child("images/rivers.jpg");
-
-        riversRef.putFile(file)
-                .addOnSuccessListener(new OnSuccessListener<UploadTask.TaskSnapshot>() {
-                    @Override
-                    public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
-                        // Get a URL to the uploaded content
-                        Uri downloadUrl = taskSnapshot.getDownloadUrl();
-                    }
-                })
-                .addOnFailureListener(new OnFailureListener() {
-                    @Override
-                    public void onFailure(@NonNull Exception exception) {
-                        // Handle unsuccessful uploads
-                        // ...
-                    }
-                });
-
-    }
-
     void uploadImagem() {
 
         if (enderecoImagem != null) {
@@ -403,7 +425,7 @@ public class HomeActivity extends AppCompatActivity {
                     }
                     postarParaFireBase(taskSnapshot.getDownloadUrl());
                     progressBar.setProgress(0);
-                    alertDialog.hide();
+
 
                 }
             }).addOnFailureListener(this, new OnFailureListener() {
@@ -428,7 +450,18 @@ public class HomeActivity extends AppCompatActivity {
             if (downloadUrl != null) {
                 post.setPhotoUri(downloadUrl.toString());
             }
-            mDatabaseRef.child(new Date(System.currentTimeMillis()).toString()).setValue(post);
+            mDatabaseRef.child(new Date(System.currentTimeMillis()).toString()).setValue(post).addOnSuccessListener(new OnSuccessListener<Void>() {
+                @Override
+                public void onSuccess(Void aVoid) {
+                    alertDialog.hide();
+                }
+            }).addOnFailureListener(new OnFailureListener() {
+                @Override
+                public void onFailure(@NonNull Exception e) {
+                    Toast.makeText(HomeActivity.this, "Falha ao Enviar", Toast.LENGTH_SHORT).show();
+                    //alertDialog.hide();
+                }
+            });
             post = null;
         }
     }
@@ -440,4 +473,27 @@ public class HomeActivity extends AppCompatActivity {
         return mimeTypeMap.getExtensionFromMimeType(cr.getType(uri));
     }
 
+    private Cursor getAnonimoCursor() {
+        String[] args = {PostHelper.COLUNA_EMISSOR_POST};
+        return dataHelper.query(PostHelper.TABLE_POST,
+                null,
+                " ? = '" + ANONIMO + "'",
+                args,
+                null,
+                null,
+                PostHelper.COLUNA_DATA_POST + " DESC");
+    }
+
+
+    private Cursor getRegistadoCursor() {
+        String[] args = {PostHelper.COLUNA_RECEPTOR_POST, PostHelper.COLUNA_RECEPTOR_POST};
+        Cursor cursor = dataHelper.query(PostHelper.TABLE_POST,
+                null,
+                null,
+                null,
+                null,
+                null,
+                PostHelper.COLUNA_DATA_POST + "  DESC");
+        return cursor;
+    }
 }

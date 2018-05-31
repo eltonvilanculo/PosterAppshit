@@ -28,7 +28,7 @@ public class RegistarUsuario extends AppCompatActivity {
     private DatabaseReference contactReference;
     private FirebaseAuth mAuth;
     public static FirebaseUser firebaseUser;
-    GestorPreference gestorPreference = new GestorPreference();
+
 
     @Override
     protected void onStart() {
@@ -153,7 +153,6 @@ public class RegistarUsuario extends AppCompatActivity {
         Task<Void> task = contactReference.child(user.getUsername()).setValue(user);
         if (!task.isSuccessful())
             Toast.makeText(RegistarUsuario.this, "Not Possible to create the User. try again later", Toast.LENGTH_SHORT).show();
-
 
     }
 

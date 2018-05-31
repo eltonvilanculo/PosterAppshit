@@ -39,13 +39,11 @@
             <ImageView
                 android:id="@+id/foto_messagem"
                 android:layout_width="296dp"
-                android:layout_height="165dp"
+                android:layout_height="wrap_content"
                 android:layout_below="@id/emissor_messagem"
                 android:layout_gravity="center"
                 android:layout_marginLeft="8dp"
-                android:padding="5dp"
-                android:src="@drawable/eltonperfil"
-                 />
+                android:padding="5dp" />
             <LinearLayout
                 android:layout_width="match_parent"
                 android:layout_height="wrap_content"

@@ -1,11 +1,17 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#3F51B5</color>
-    <color name="colorPrimaryDark">#0a090a</color>
+    <color name="colorPrimary">#455A64</color>
+    <color name="colorPrimaryDark">#607D8B</color>
     <color name="colorT">#484343</color>
-    <color name="colorAccent">#7aacd2</color>
+    <color name="colorAccent">#FF5722</color>
+    <color name="colorPrimaryLight"> #D1C4E9</color>
     <color name ="colorErrorInput">#c9000d</color>
-    <color name="colorActivatedInput">#7aacd2</color>
-    <color name="colorNormalInput">#484343</color>
+    <color name="colorActivatedInput">#757575</color>
+    <color name="colorNormalInput">#212121</color>
     <color name="card_color">#fffefe</color>
+    <color name="corCastanha">#1079756b</color>
+
+
+
+
 </resources>

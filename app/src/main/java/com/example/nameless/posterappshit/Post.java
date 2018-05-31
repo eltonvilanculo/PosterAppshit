@@ -70,4 +70,15 @@ public class  Post {
     public void setReceptor(String receptor) {
         this.receptor = receptor;
     }
+
+    @Override
+    public String toString() {
+        return "Post{" +
+                "text='" + text + '\'' +
+                ", date=" + date +
+                ", sender='" + sender + '\'' +
+                ", receptor='" + receptor + '\'' +
+                ", photoUri='" + photoUri + '\'' +
+                '}';
+    }
 }
