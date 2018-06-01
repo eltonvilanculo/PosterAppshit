@@ -11,6 +11,7 @@ import android.widget.TextView;
 
 import com.squareup.picasso.Picasso;
 
+import java.util.ArrayList;
 import java.util.List;
 import java.util.Vector;
 
@@ -22,27 +23,34 @@ public class PostAdapter extends RecyclerView.Adapter<PostAdapter.MyViewHolder> 
     private Cursor cursor;
     private LayoutInflater inflater;
     Context context;
+    ArrayList<Post> posts = new ArrayList<>();
+
 
     public PostAdapter(List<Post> listaPosts, Context context) {
         this.context = context;
     }
 
     public PostAdapter(Context context, Cursor cursor) {
-        this.cursor = cursor;
+
         this.inflater = LayoutInflater.from(context);
+        this.cursor = cursor;
     }
 
+    public void addicionaPost(Post post) {
+        posts.add(post);
+        notifyDataSetChanged();
+    }
     @Override
     public MyViewHolder onCreateViewHolder(ViewGroup parent, int viewType) {
         View view = inflater.inflate(R.layout.cardview_item, parent, false);
-        PostAdapter.MyViewHolder holder = new PostAdapter.MyViewHolder(view);
-        return holder;
+       // PostAdapter.MyViewHolder holder = new PostAdapter.MyViewHolder(view);
+        return new MyViewHolder(view);
     }
 
     @Override
     public void onBindViewHolder(PostAdapter.MyViewHolder holder, int position) {
         if (cursor.moveToPosition(position)) {
-            Picasso.with(inflater.getContext()).load(cursor.getString(cursor.getColumnIndex(PostHelper.COLUNA_IMAGEM_URI_POST)));
+            Picasso.with(inflater.getContext()).load(cursor.getString(cursor.getColumnIndex(PostHelper.COLUNA_IMAGEM_URI_POST))).into(holder.imageProfile);
             holder.nomeUsuario.setText(cursor.getString(cursor.getColumnIndex(PostHelper.COLUNA_EMISSOR_POST)));
             holder.statusFoto.setText(cursor.getString(cursor.getColumnIndex(PostHelper.COLUNA_TEXTO_POST)));
         }

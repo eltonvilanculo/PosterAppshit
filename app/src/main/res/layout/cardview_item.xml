@@ -6,8 +6,7 @@
     xmlns:app="http://schemas.android.com/apk/res-auto"
     android:id="@+id/cardViewId"
     app:cardCornerRadius="4dp"
-    app:cardBackgroundColor="@color/card_color"
->
+    app:cardBackgroundColor="@color/card_color">
 
 
     <LinearLayout

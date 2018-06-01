@@ -2,29 +2,26 @@
 <menu xmlns:android="http://schemas.android.com/apk/res/android"
     xmlns:app="http://schemas.android.com/apk/res-auto">
 
-    <item android:id="@+id/perfilUsuario"
+    <item
+        android:id="@+id/perfilUsuario"
+        android:onClick="verificarPerfil"
         android:title="Profile"
         app:showAsAction="never"
-        android:onClick="verificarPerfil"
+
 
         />
 
-    <item android:id="@+id/definicoes"
-        android:title="Settings"
-        app:showAsAction="never"
-        android:onClick="verificarSettings"
-        />
 
-    <item android:id="@+id/aboutUs"
-        android:title="About us"
-        app:showAsAction="never"
+    <item
+        android:id="@+id/aboutUs"
         android:onClick="verificarUs"
-        />
+        android:title="About us"
+        app:showAsAction="never" />
 
-    <item android:id="@+id/logout"
-        android:title="Logout"
-        app:showAsAction="never"
+    <item
+        android:id="@+id/logout"
         android:onClick="verificarLogout"
-        />
+        android:title="Logout"
+        app:showAsAction="never" />
 
 </menu>

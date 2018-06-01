@@ -1,15 +1,15 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
-    <color name="colorPrimary">#455A64</color>
-    <color name="colorPrimaryDark">#607D8B</color>
-    <color name="colorT">#484343</color>
-    <color name="colorAccent">#FF5722</color>
+    <color name="colorPrimary">#673AB7</color>
+    <color name="colorPrimaryDark">#512DA8</color>
+    <color name="colorT">#D1C4E9</color>
+    <color name="colorAccent">#FF4081</color>
     <color name="colorPrimaryLight"> #D1C4E9</color>
-    <color name ="colorErrorInput">#c9000d</color>
-    <color name="colorActivatedInput">#757575</color>
+    <color name ="colorErrorInput">#b12020</color>
+    <color name="colorActivatedInput">#1cd8e2</color>
     <color name="colorNormalInput">#212121</color>
-    <color name="card_color">#fffefe</color>
-    <color name="corCastanha">#1079756b</color>
+    <color name="card_color">#FFFFFF</color>
+    <color name="corCastanha">#BDBDBD</color>
 
 
 

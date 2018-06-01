@@ -64,10 +64,11 @@ public class RegistarUsuario extends AppCompatActivity {
     public void signUp(View view) {
 // Continuar daqui , algo nao ta nice no metodo
       if (validacaoLogin()==true){
-          Toast.makeText(RegistarUsuario.this, "Autenticado", Toast.LENGTH_SHORT).show();
+         //Toast.makeText(RegistarUsuario.this, "Autenticado", Toast.LENGTH_SHORT).show();
+          createUser(editEmail.getText().toString(), editPassword.getText().toString(), editNomeUsuario.getText().toString());
       }
 
-                //createUser(editEmail.getText().toString(), editPassword.getText().toString(), editNomeUsuario.getText().toString());
+
                // gestorPreference.addPreference(editEmail.getText().toString(), editPassword.getText().toString());
          //
 

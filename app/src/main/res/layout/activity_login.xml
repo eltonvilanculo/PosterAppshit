@@ -4,24 +4,34 @@
     xmlns:tools="http://schemas.android.com/tools"
     android:layout_width="match_parent"
     android:layout_height="match_parent"
-    android:background="@drawable/principal2"
-    android:backgroundTint="@color/common_google_signin_btn_text_dark_default"
+        android:background="@android:color/white"
     android:orientation="vertical"
     android:weightSum="100"
     tools:context="com.example.nameless.posterappshit.LoginActivity">
 
 
     <LinearLayout
-        android:id="@+id/linear_Imagem"
-        android:layout_width="match_parent"
-        android:layout_height="0dp"
-        android:layout_weight="30"
-        android:background="@drawable/principal2"
-        android:orientation="vertical"
 
+        android:id="@+id/linear_Imagem"
+        android:layout_width="270dp"
+        android:layout_height="20dp"
+        android:layout_gravity="center_horizontal"
+        android:layout_marginTop="40dp"
+        android:layout_weight="30"
+        android:orientation="vertical"
         tools:ignore="Suspicious0dp">
 
 
+        <ImageView
+            android:id="@+id/imageIcon"
+            android:background="@drawable/fajdone"
+            android:scaleX="0.7"
+            android:scaleY="0.6"
+            android:layout_width="270dp"
+            android:layout_height="200dp"
+
+
+            />
     </LinearLayout>
 
     <LinearLayout
@@ -47,7 +57,7 @@
                 android:layout_height="wrap_content"
                 android:ems="10"
                 android:hint="Email"
-                android:textColorHint="#4a54d2" />
+                />
 
 
         </android.support.design.widget.TextInputLayout>

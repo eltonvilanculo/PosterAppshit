@@ -14,6 +14,7 @@
         <item name="colorControlActivated">@color/colorActivatedInput</item>
 
 
+
     </style>
 
     <style name="AppTheme.NoActionBar">

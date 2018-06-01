@@ -127,6 +127,8 @@ public class HomeActivity extends AppCompatActivity {
             toolbar.setElevation(10f);
             toolbar.setFocusable(true);
         }
+
+
         toolbar.inflateMenu(R.menu.menu_toolbar_config);
         // Framelayout
         /**
@@ -237,6 +239,7 @@ public class HomeActivity extends AppCompatActivity {
                 Post value = dataSnapshot.getValue(Post.class);
                 System.out.println("value = " + value.toString());
                 meteNoSQL(value, dataSnapshot.getKey());
+                postAdapter.notifyDataSetChanged();
             }
 
             @Override
@@ -284,24 +287,26 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     public void verificarPerfil(MenuItem item) {
+        if (!LoginActivity.firebaseUser.isAnonymous()) {
+            item.setTitle(user.getUsername());
 
-        Toast.makeText(HomeActivity.this, "Estou chateado", Toast.LENGTH_SHORT).show();
+        } else {
+            item.setTitle(ANONIMO);
+        }
     }
 
-    public void verificarSettings(MenuItem item) {
-        Toast.makeText(HomeActivity.this, "Comming soon", Toast.LENGTH_LONG).show();
-    }
 
     public void verificarUs(MenuItem item) {
-        Toast.makeText(HomeActivity.this, "Comming soon", Toast.LENGTH_LONG).show();
+        String url = "https://web.facebook.com/FAJ-161044741417431/?modal=admin_todo_tour";
+        Intent i = new Intent(Intent.ACTION_VIEW);
+        i.setData(Uri.parse(url));
+        startActivity(i);
     }
 
     public void verificarLogout(MenuItem item) {
-        String nome = item.getTitle().toString();
-        if (!(LoginActivity.firebaseUser.isAnonymous())) {
-            item.setTitle("Logout ( " + user.getUsername() + ")");
-        }
-        item.setTitle("Logout ( " + ANONIMO + ")");
+        Intent intent = new Intent(HomeActivity.this, LoginActivity.class);
+        startActivity(intent);
+
     }
 
 
@@ -345,7 +350,7 @@ public class HomeActivity extends AppCompatActivity {
                 if (LoginActivity.firebaseUser.isAnonymous()) {
                     post.setSender(ANONIMO);
                 } else {
-                    //post.setSender(user.getUsername());
+                    post.setSender(user.getUsername());
                 }
 
                 if (enderecoImagem != null) {
@@ -419,7 +424,7 @@ public class HomeActivity extends AppCompatActivity {
                 @Override
                 public void onSuccess(UploadTask.TaskSnapshot taskSnapshot) {
                     try {
-                        Thread.sleep(500);
+                        Thread.sleep(50);
                     } catch (InterruptedException e) {
                         e.printStackTrace();
                     }
@@ -474,10 +479,10 @@ public class HomeActivity extends AppCompatActivity {
     }
 
     private Cursor getAnonimoCursor() {
-        String[] args = {PostHelper.COLUNA_EMISSOR_POST};
+        String[] args = {ANONIMO};
         return dataHelper.query(PostHelper.TABLE_POST,
                 null,
-                " ? = '" + ANONIMO + "'",
+                PostHelper.COLUNA_EMISSOR_POST + " = ? ",
                 args,
                 null,
                 null,
@@ -486,7 +491,6 @@ public class HomeActivity extends AppCompatActivity {
 
 
     private Cursor getRegistadoCursor() {
-        String[] args = {PostHelper.COLUNA_RECEPTOR_POST, PostHelper.COLUNA_RECEPTOR_POST};
         Cursor cursor = dataHelper.query(PostHelper.TABLE_POST,
                 null,
                 null,
